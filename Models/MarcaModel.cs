@@ -12,7 +12,7 @@ namespace Fiap.Api.AspNet3.Models
         public int MarcaId { get; set; }
 
         [Required]
-        [MaxLength(40, ErrorMessage = "Nome da Marca precisa ter até {0} caracteres")]
+        [MaxLength(40, ErrorMessage = "Nome da Marca precisa ter até 40 caracteres")]
         public string NomeMarca { get; set; }
 
         public MarcaModel()
