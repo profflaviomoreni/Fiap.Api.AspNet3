@@ -1,5 +1,7 @@
 ﻿using Fiap.Api.AspNet3.Data;
 using Fiap.Api.AspNet3.Models;
+using Fiap.Api.AspNet3.Repository;
+using Fiap.Api.AspNet3.Repository.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -14,14 +16,16 @@ namespace Fiap.Api.AspNet3.Controllers
 
         
         private readonly DataContext dataContext;
+        private readonly IMarcaRepository marcaRepository;
 
-        public MarcaController([FromServices] DataContext ctx)
+        public MarcaController([FromServices] DataContext ctx, [FromServices] IMarcaRepository _marcaRepository)
         {
             dataContext = ctx;
+            marcaRepository = _marcaRepository;
         }
         
 
-
+        /*
         [HttpGet]
         public async Task<ActionResult<IList<MarcaModel>>> Get() // Find All
         {
@@ -35,6 +39,42 @@ namespace Fiap.Api.AspNet3.Controllers
 
             return Ok(listaMarcas);
         }
+        */
+
+
+        [HttpGet]
+        public async Task<ActionResult<IList<dynamic>>> Get(
+            [FromQuery] int pagina = 0,
+            [FromQuery] int tamanho = 3
+        ) // Find All
+        {
+
+            var totalGeral = marcaRepository.Count();
+            var totalPagina = (int) Math.Ceiling( (double) totalGeral / tamanho );
+            var anterior = pagina > 0 ?  $"marca?pagina={pagina-1}&tamanho={tamanho}" : "";
+            var proxima = pagina < totalPagina -1 ? $"marca?pagina={pagina + 1}&tamanho={tamanho}" : "";
+
+            if ( pagina > totalPagina)
+            {
+                return NotFound();
+            }
+           
+            var marcas = marcaRepository.FindAll(pagina, tamanho);
+
+            return Ok(
+                new
+                {
+                    total = totalGeral,
+                    totalPaginas = totalPagina,
+                    anterior = anterior,
+                    proxima = proxima,
+                    marcas = marcas
+                }    
+            );
+
+
+        }
+
 
 
 
