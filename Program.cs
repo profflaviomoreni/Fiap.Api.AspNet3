@@ -98,15 +98,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
+        
         foreach (var description in provider.ApiVersionDescriptions)
         {
             c.SwaggerEndpoint(
-            $"/swagger/{description.GroupName}/swagger.json",
-            description.GroupName.ToUpperInvariant());
+                $"/swagger/{description.GroupName}/swagger.json",
+                description.GroupName.ToUpperInvariant()
+            );
         }
+        
 
         c.DocExpansion(DocExpansion.List);
-        c.RoutePrefix = string.Empty;
+        //c.RoutePrefix = string.Empty;
+        
     });
 }
 
