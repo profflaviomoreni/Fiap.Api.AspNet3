@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Fiap.Api.AspNet3.Models
 {
 
+    /// <summary>
+    ///     Classe que representa a entidade de categoria
+    /// </summary>
     [Table("Categorias")]
     public class CategoriaModel
     {

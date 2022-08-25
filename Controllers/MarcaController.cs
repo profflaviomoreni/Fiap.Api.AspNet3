@@ -7,8 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fiap.Api.AspNet3.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [ApiVersion("2.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [ResponseCache(Duration = 30, VaryByHeader = "User-Agent", Location = ResponseCacheLocation.Any)]
     public class MarcaController : ControllerBase
     {
 
@@ -19,9 +22,13 @@ namespace Fiap.Api.AspNet3.Controllers
         {
             dataContext = ctx;
         }
-        
 
 
+        /// <summary>
+        ///     Resumo do método GET da API de Marca
+        /// </summary>
+        /// <returns>200 - Sucesso</returns>
+        [ApiVersion("1.0", Deprecated = true)]
         [HttpGet]
         public async Task<ActionResult<IList<MarcaModel>>> Get() // Find All
         {
@@ -37,8 +44,44 @@ namespace Fiap.Api.AspNet3.Controllers
         }
 
 
+        [ApiVersion("2.0")]
+        [ApiVersion("3.0")]
+        [HttpGet]
+        public async Task<ActionResult<IList<dynamic>>> Get(
+            [FromQuery] int pagina = 0,
+            [FromQuery] int tamanho = 3
+        ) // Find All
+        {
+            var totalGeral = dataContext.Marcas.Count();
+            var totalPagina = (int)Math.Ceiling((double)totalGeral / tamanho);
+            var anterior = pagina > 0 ? $"marca?pagina={pagina - 1}&tamanho={tamanho}" : "";
+            var proxima = pagina < totalPagina - 1 ? $"marca?pagina={pagina + 1}&tamanho={tamanho}" : "";
+
+            if (pagina > totalPagina)
+            {
+                return NotFound();
+            }
+            var marcas = dataContext.Marcas
+                                .Skip(tamanho * pagina)
+                                .Take(tamanho)
+                                .ToList();
+            return Ok(
+                new
+                {
+                    total = totalGeral,
+                    totalPaginas = totalPagina,
+                    anterior = anterior,
+                    proxima = proxima,
+                    marcas = marcas
+                }
+            );
+        }
+
+
+
 
         [HttpGet("{id:int}")]
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public async Task<ActionResult<MarcaModel>> Get(int id) //Find By Id 
         {
 
